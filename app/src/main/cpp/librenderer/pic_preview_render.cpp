@@ -46,7 +46,7 @@ void PicPreviewRender::resetRenderSize(int left, int top, int width, int height)
 void PicPreviewRender::render(){
     // 设置窗口大小
 	glViewport(_backingLeft, _backingTop, _backingWidth, _backingHeight);
-    // 清屏颜色
+    // 清屏颜色，背景色
 	glClearColor(0.0f, 0.0f, 1.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
     glEnable(GL_BLEND);
@@ -54,10 +54,18 @@ void PicPreviewRender::render(){
 
     // 使用显卡绘制程序
 	glUseProgram(program);
+
+    // 整个区域
 	static const GLfloat _vertices[] = { -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f, -1.0f };
+    // 右上角4分之一区域
+//    static const GLfloat _vertices[] = { 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f };
 	glVertexAttribPointer(ATTRIBUTE_VERTEX, 2, GL_FLOAT, 0, 0, _vertices);
 	glEnableVertexAttribArray(ATTRIBUTE_VERTEX);
+
+    // 整个图片
 	static const GLfloat texCoords[] = { 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f };
+    // 部分图片
+//    static const GLfloat texCoords[] = { 0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.5f };
 	glVertexAttribPointer(ATTRIBUTE_TEXCOORD, 2, GL_FLOAT, 0, 0, texCoords);
 	glEnableVertexAttribArray(ATTRIBUTE_TEXCOORD);
 	picPreviewTexture->bindTexture(uniformSampler);
@@ -82,18 +90,24 @@ void PicPreviewRender::dealloc() {
 }
 
 int PicPreviewRender::useProgram() {
+    // 创建程序的容器，返回容器的句柄
 	program = glCreateProgram();
+    // shader附着到程序
 	glAttachShader(program, vertShader);
 	glAttachShader(program, fragShader);
+    // 绑定属性
 	glBindAttribLocation(program, ATTRIBUTE_VERTEX, "position");
 	glBindAttribLocation(program, ATTRIBUTE_TEXCOORD, "texcoord");
+    // 链接程序
 	glLinkProgram(program);
+    // 查看链接结果
 	GLint status;
 	glGetProgramiv(program, GL_LINK_STATUS, &status);
 	if (status == GL_FALSE) {
 		LOGI("Failed to link program %d", program);
 		return -1;
 	}
+    // 使用程序
 	glUseProgram(program);
 
 	uniformSampler = glGetUniformLocation(program, "yuvTexSampler");
@@ -124,13 +138,17 @@ bool PicPreviewRender::checkGlError(const char* op) {
 
 GLuint PicPreviewRender::compileShader(GLenum type, const char *sources) {
 	GLint status;
+    // 创建shader的容器，返回容器的句柄  type为GL_VERTEX_SHADER/GL_FRAGMENT_SHADER
 	GLuint shader = glCreateShader(type);
 	if (shader == 0 || shader == GL_INVALID_ENUM) {
 		LOGI("Failed to create shader %d", type);
 		return 0;
 	}
+    // 为shader添加源码
 	glShaderSource(shader, 1, &sources, NULL);
+    // 编译shader
 	glCompileShader(shader);
+    // 查看编译结果
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
 	if (status == GL_FALSE) {
 		glDeleteShader(shader);

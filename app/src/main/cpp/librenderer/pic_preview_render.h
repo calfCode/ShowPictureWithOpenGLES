@@ -24,6 +24,19 @@ static const char* PIC_PREVIEW_VERTEX_SHADER_2 =
 		"   v_texcoord = texcoord;  \n"
 		"}                            \n";
 
+/*
+ * 计算顶点坐标
+ v_texcoord = texcoord;
+
+取出二维纹理中该纹理坐标点上的纹理像素值
+ texture2D(yuvTexSampler, v_texcoord);
+
+ vec4 gl_Position用来设置顶点转换到屏幕坐标的位置，Vertex Shader一定要去更新这个数值
+
+ float gl_pointSize; 在粒子效果的场景下，需要为粒子设置大小，改变该内置变量的值就是为了设置每一个粒子矩形的大小
+
+ vec4 gl_FragColor; 用于指定当前纹理坐标所代表的像素点的最终颜色
+ */
 /**
  * Video OpenGL View
  */
